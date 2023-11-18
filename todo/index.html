@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoApp</title>
+
+    <link rel="stylesheet" href="./bootstrap.min.css">
+    <link rel="stylesheet" href="./all.min.css">
+</head>
+
+<body>
+
+    <!-- <h1>Todo App</h1>
+    <div><input type="text"><button>Add</button></div>
+    <ul id="todo"></ul> -->
+
+    <nav class="navbar navbar-dark bg-secondary">
+        <div class="container" style="max-width: 600px;">
+            <a href="#" class="navbar-brand">To Do.app
+                <span class="badge bg-danger ms-2">0</span>
+            </a>
+
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="#" id="clear" class="nav-link">Clear</a>
+                </li>
+            </ul>
+
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 600px;">
+        <div class="input-group my-4">
+            <input type="text" class="form-control">
+            <button class="btn btn-dark">Add</button>
+        </div>
+
+        <ul id="todo" class="list-group"></ul>
+        <ul id="done" class="list-group mt-4" style="opacity: 0.4;"></ul>
+
+    </div>
+
+    <script>
+
+        getData().map(item => createItem(item.text, item.done));
+        // parse = string to object
+        function getData() {
+            // data means tasks in to do list
+            // getItem is to retrive back data that we previously save on last session or simply yesterday
+            return JSON.parse(localStorage.getItem("data")) || [];
+        }
+
+        function saveData(text) {
+            let data = getData();
+            data.push({ text, done: false });
+            //stringfy => object to string
+            localStorage.setItem("data", JSON.stringify(data));
+        }
+
+        function removeData(text) {
+            let data = getData();
+            let result = data.filter(item => item.text != text);
+            localStorage.setItem("data", JSON.stringify(result));
+        }
+
+        function checkData(text) {
+            let data = getData();
+            let result = data.map(item => {
+                if (item.text == text) item.done = true;
+                return item;
+            })
+            localStorage.setItem("data", JSON.stringify(result));
+        }
+
+        function clearData() {
+            let data = getData();
+            let result = data.filter(item => !item.done);
+            localStorage.setItem("data", JSON.stringify(result));
+        }
+
+        document.querySelector("#clear").onclick = () => {
+            document.querySelector("#done").textContent = "";
+            clearData();
+        }
+
+        function updateCount() {
+            document.querySelector(".badge").textContent =
+                document.querySelectorAll("#todo li").length;
+        }
+        document.querySelector("button").onclick = () => {
+            let text = document.querySelector("input").value;
+            if (!text) return false;  // input value br mha m shi yin htae loz m ya ag loz 
+
+            createItem(text);
+            updateCount();
+            saveData(text);
+
+
+            document.querySelector("input").value = "";
+            document.querySelector("input").focus();
+        }
+
+        document.querySelector("input").onkeydown = e => {
+            if (e.key == "Enter") {
+                document.querySelector("button").onclick();
+            }
+        }
+
+        function createItem(text, done = false) {
+            let li = document.createElement("li");
+            li.classList.add("list-group-item");
+            li.textContent = text;
+
+
+            // deleteList 
+            let del = document.createElement("a");
+            del.setAttribute("href", "#");
+            del.classList.add("fa-solid", "fa-trash", "text-danger", "float-end")
+            // del.textContent = "Del";
+
+            del.onclick = () => {
+                li.remove();
+                updateCount();
+
+                removeData(text);
+                document.querySelector("input").focus(); // after deleting not to remove cursor 
+            }
+
+            li.appendChild(del);
+
+            // check prperty
+            let check = document.createElement("a");
+            check.setAttribute("href", "#");
+            check.classList.add("fa-solid", "fa-check", "float-start", "me-3");
+
+            // check feature
+            check.onclick = () => {
+                document.querySelector("#done").appendChild(li);
+                check.remove();
+                updateCount();
+                checkData(text);
+            }
+
+            if (!done) li.appendChild(check);
+
+            if (done) {
+                document.querySelector("#done").appendChild(li);
+            } else {
+                document.querySelector("#todo").appendChild(li);
+            }
+        }
+    </script>
+</body>
+
+</html>
